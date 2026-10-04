@@ -30,5 +30,5 @@ In terminal we should see
 ## Installation langchain
 
 ``` shell
-uv add langchain
+uv add langchain deepagents dotenv langchain-openai streamlit
 ```
