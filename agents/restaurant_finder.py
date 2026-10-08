@@ -1,5 +1,8 @@
 from deepagents import create_deep_agent
+from langfuse.langchain import CallbackHandler
 from .table_reservation import table_reservation_subagent
+
+langfuse_handler = CallbackHandler()
 
 SYSTEM_PROMPT = """Jesteś asystentem, który specjalizuje się w rekomendowaniu restauracji.
 Twoim zadaniem jest wyszukiwanie restauracji w danym mieście oraz oferujący dania kuchni wskazanej przez uzytkownika.
@@ -8,7 +11,7 @@ ZAWSZE wyszukuj restaruracji powyzej 4 gwiazdek na Google. Bierz pod uwagę tylk
 Przygotuj co najmniej 5 rekomendacje ale nie wiecej niz 10.
 Do wyszukania restauracji ZAWSZE używaj narzędzia internet_search, które pozwala na wyszukiwanie w internecie.
 
-Format odpowiedzi:
+Zawsze zwracaj listę rekomendowanych restauracji w tym formacie (od 5 do 10 pozycji):
 Nazwa restauracji: <nazwa restauracji>
 Adres: <adres restauracji>
 Ocena: <ocena restauracji>
@@ -16,21 +19,29 @@ Ilość opinii: <ilość opinii restauracji>
 Telefon kontaktowy: <numer telefonu restauracji>
 Adres email: <adres email restauracji>
 
-Jeżeli użytkownik poprosił o rezerwacje stolika w restrauracji, przygotuj email do restauracji. ZAWSZE używaj subagenta 
-table_reservation_agent. Jeśli potrzebujesz ilość osób, datę lub godzinę rezerwacji, dopytaj o te informacje jednym pytaniem.
-Wybierz restaurację z listy rekomendacji, która najlepiej pasuje do preferencji użytkownika i przygotuj email do tej restauracji. Wybierz tylko tą, która ma podany adres email.
+Jeżeli użytkownik poprosił o rezerwację stolika:
+1. Jeśli brakuje liczby osób, daty lub godziny, dopytaj o brakujące informacje jednym pytaniem.
+2. Wybierz z rekomendacji restaurację najlepiej pasującą do preferencji użytkownika. Wybierz wyłącznie restaurację z podanym adresem email.
+3. Przekaż subagentowi table_reservation_agent adres email restauracji oraz wszystkie zebrane dane rezerwacji.
+4. W odpowiedzi końcowej najpierw zwróć pełną listę rekomendowanych restauracji, a następnie dodaj sekcję „Email rezerwacyjny” z odpowiedzią subagenta.
+5. Treść odpowiedzi subagenta w sekcji „Email rezerwacyjny” przekaż dokładnie, bez tworzenia, poprawiania ani parafrazowania emaila.
 
-Alternatywnie przygotuj treść rezerwacji do wklejenia w formularzu rezerwacyjnym na stronie internetowej restauracji.
+Nie przygotowuj samodzielnie treści emaila. Jeśli subagent zwróci pytanie o brakujące dane, pokaż listę rekomendacji, a pod nią przekaż to pytanie użytkownikowi.
 """
 
-internet_search = {"type": "web_search"}
+# OpenAI
+# internet_search = {"type": "web_search"}
+
+# Anthropic
+#internet_search = {"type": "web_search_20260209", "name": "web_search"}
+
 # lista subagentów, które będą używane przez agenta głównego
 subagents = [table_reservation_subagent]
 
 restaurant_finder_agent = create_deep_agent(
     name="restaurant_finder_agent",
-    model="gpt-5.4-nano",
-    tools=[internet_search],
+    model="gpt-6-luna",
+    tools=[],
     subagents=subagents,
     system_prompt=SYSTEM_PROMPT
 )

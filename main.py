@@ -1,7 +1,9 @@
 import streamlit as st
 from dotenv import load_dotenv
+from langfuse.langchain import CallbackHandler
 
 load_dotenv()
+langfuse_handler = CallbackHandler()
 
 from agents.restaurant_finder import restaurant_finder_agent
 
@@ -32,15 +34,18 @@ def message_role(message):
 
 
 st.set_page_config(page_title="Restaurant Finder", page_icon="🍽️")
-st.title("Restaurant Finder")
-
 st.session_state.setdefault("conversation", [])
 
-if st.button("Nowe zapytanie", icon="➕"):
+title_col, reset_col = st.columns([5, 1])
+with title_col:
+    st.title("Restaurant Finder 🍽️")
+with reset_col:
+    st.write("")
+    reset_conversation = st.button("Nowe zapytanie", icon="➕", use_container_width=True)
+
+if reset_conversation:
     st.session_state.conversation = []
     st.rerun()
-
-st.caption("Zapytaj o restaurację, poproś o rezerwację albo odpowiedz na pytanie agenta.")
 
 for message in st.session_state.conversation:
     role = message_role(message)
@@ -59,47 +64,25 @@ if user_request:
         st.markdown(user_request)
 
     with st.chat_message("assistant"):
-        activity = st.empty()
-        activity_lines = []
-        output_areas = {}
-        output_text = {}
+        response_area = st.empty()
+        streamed_response = ""
         final_state = None
-
-        def label_for(namespace):
-            path = "/".join(namespace)
-            if "table-reservation-agent" in path:
-                return "Subagent rezerwacji"
-            return "Agent wyszukiwania restauracji"
 
         try:
             for namespace, mode, data in restaurant_finder_agent.stream(
                 {"messages": st.session_state.conversation},
-                stream_mode=["messages", "updates", "values"],
+                stream_mode=["messages", "values"],
                 subgraphs=True,
                 version="v1",
+                config={"callbacks": [langfuse_handler]},
             ):
-                label = label_for(namespace)
-
                 if mode == "messages":
-                    message, metadata = data
-                    token_text = text_from_content(getattr(message, "content", ""))
-                    if token_text:
-                        output_text[label] = output_text.get(label, "") + token_text
-                        if label not in output_areas:
-                            st.markdown(f"**{label}**")
-                            output_areas[label] = st.empty()
-                        output_areas[label].markdown(output_text[label])
-
-                elif mode == "updates":
-                    for node_name in data:
-                        if node_name == "task":
-                            activity_lines.append("Agent przekazuje zadanie subagentowi.")
-                        elif node_name == "tools":
-                            activity_lines.append(f"{label}: wykonuje narzędzie.")
-                        elif node_name == "model":
-                            activity_lines.append(f"{label}: analizuje wyniki.")
-                    if activity_lines:
-                        activity.markdown("\n\n".join(f"- {line}" for line in activity_lines[-8:]))
+                    if not namespace:
+                        message, _metadata = data
+                        token_text = text_from_content(getattr(message, "content", ""))
+                        if token_text:
+                            streamed_response += token_text
+                            response_area.markdown(streamed_response)
 
                 elif mode == "values" and not namespace:
                     final_state = data

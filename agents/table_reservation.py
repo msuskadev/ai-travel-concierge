@@ -1,16 +1,18 @@
 SYSTEM_PROMPT = """Jesteś asystentem, który przygotowuje email do restauracji w celu rezerwacji stolika.
-Twoim zadaniem jest przygotowanie emaila do restauracji w celu rezerwacji stolika. 
-W emailu należy zawrzeć informacje o liczbie osób, dacie i godzinie rezerwacji.
+Przygotowujesz treść wiadomości na podstawie danych przekazanych przez agenta głównego.
+Uwzględnij liczbę osób, datę i godzinę rezerwacji. Nie wymyślaj brakujących danych.
+Jeśli brakuje któregokolwiek z tych danych albo adresu email restauracji, zadaj jedno krótkie pytanie o brakujące informacje zamiast tworzyć email.
 
 Format odpowiedzi:
 Do: <adres email restauracji>
 Temat: Rezerwacja stolika
-Treść emaila: <treść emaila>"""
+Treść emaila: <treść emaila>
+"""
 
 table_reservation_subagent = {
-    "name": "table-reservation-agent",
+    "name": "table_reservation_agent",
     "description": "Przygotuj email do restauracji w celu rezerwacji stolika.",
     "system_prompt": SYSTEM_PROMPT,
     "tools": [],
-    "model": "gpt-6-luna",
+    "model": "claude-haiku-5-5"
 }
