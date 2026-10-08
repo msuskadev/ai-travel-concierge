@@ -1,4 +1,4 @@
-# ai-restaurant-agent
+# ai-travel-concierge
 
 ## Prerequisites:
 * UV Env Management
@@ -24,7 +24,7 @@ source .venv/bin/activate
 
 In terminal we should see
 ``` shell
-(ai-restaurant-agent) mietek@MacBook-Air-Mietek ai-restaurant-agent % 
+(ai-travel-concierge) mietek@MacBook-Air-Mietek ai-travel-concierge % 
 ```
 
 ## Installation langchain

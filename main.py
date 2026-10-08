@@ -1,15 +1,93 @@
+import streamlit as st
 from dotenv import load_dotenv
-from deepagents import create_deep_agent
+from langfuse.langchain import CallbackHandler
 
 load_dotenv()
+langfuse_handler = CallbackHandler()
 
-agent = create_deep_agent(
-    name="restaurant_agent",
-    model="gpt-4o",
-    tools=[],   
-)
+from agents.trip_planner import trip_planner_agent
 
-result = agent.invoke({"messages": [{"role": "user", "content": "Can you say Hallo World in some language (selected by you)?"}]})
 
-# Print the agent's response
-print(result["messages"][-1].content)
+def text_from_content(content):
+    if isinstance(content, str):
+        return content
+    if isinstance(content, dict):
+        return content.get("text", "")
+    if isinstance(content, list):
+        return "".join(
+            block.get("text", "")
+            for block in content
+            if isinstance(block, dict) and block.get("type") == "text"
+        )
+    return ""
+
+
+def message_role(message):
+    if isinstance(message, dict):
+        return message.get("role")
+    role = getattr(message, "type", None)
+    if role == "human":
+        return "user"
+    if role == "ai":
+        return "assistant"
+    return None
+
+
+st.set_page_config(page_title="Trip Planner", page_icon="✈️")
+st.session_state.setdefault("conversation", [])
+
+title_col, reset_col = st.columns([5, 1])
+with title_col:
+    st.title("Trip Planner ✈️")
+with reset_col:
+    st.write("")
+    reset_conversation = st.button("Nowe zapytanie", icon="➕", use_container_width=True)
+
+if reset_conversation:
+    st.session_state.conversation = []
+    st.rerun()
+
+for message in st.session_state.conversation:
+    role = message_role(message)
+    content = text_from_content(
+        message.get("content", "") if isinstance(message, dict) else getattr(message, "content", "")
+    )
+    if role and content:
+        with st.chat_message(role):
+            st.markdown(content)
+
+user_request = st.chat_input("Napisz wiadomość…")
+
+if user_request:
+    st.session_state.conversation.append({"role": "user", "content": user_request})
+    with st.chat_message("user"):
+        st.markdown(user_request)
+
+    with st.chat_message("assistant"):
+        response_area = st.empty()
+        streamed_response = ""
+        final_state = None
+
+        try:
+            for namespace, mode, data in trip_planner_agent.stream(
+                {"messages": st.session_state.conversation},
+                stream_mode=["messages", "values"],
+                subgraphs=True,
+                version="v1",
+                config={"callbacks": [langfuse_handler]},
+            ):
+                if mode == "messages":
+                    if not namespace:
+                        message, _metadata = data
+                        token_text = text_from_content(getattr(message, "content", ""))
+                        if token_text:
+                            streamed_response += token_text
+                            response_area.markdown(streamed_response)
+
+                elif mode == "values" and not namespace:
+                    final_state = data
+
+            if final_state and "messages" in final_state:
+                st.session_state.conversation = final_state["messages"]
+        except Exception as exc:
+            st.error(f"Wystąpił błąd podczas działania agentów: {exc}")
