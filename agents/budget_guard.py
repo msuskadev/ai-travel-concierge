@@ -16,5 +16,5 @@ budget_guard_agent = {
     "name": "budget_guard_agent",
     "description": "Monitoruj budżet podróży i zapewniaj optymalne opcje.",
     "system_prompt": SYSTEM_PROMPT,
-    "model": "gpt-4.1-nano"
+    "model": "gpt-6-luna"
 }
