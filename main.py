@@ -9,7 +9,7 @@ agent = create_deep_agent(
     tools=[],   
 )
 
-result = agent.invoke({"messages": [{"role": "user", "content": "Can you say Hallo World in some language (selected by you)?"}]})
+result = agent.invoke({"messages": [{"role": "user", "content": "Powiedz Hallo World w wybranym języku naturalnym(wybranym przez ciebie)?"}]})
 
 # Print the agent's response
 print(result["messages"][-1].text)
