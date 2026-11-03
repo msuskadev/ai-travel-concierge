@@ -5,7 +5,7 @@ from langfuse.langchain import CallbackHandler
 st.set_page_config(page_title="Trip Planner", page_icon="✈️")
 
 load_dotenv()
-langfuse_handler = CallbackHandler()
+# langfuse_handler = CallbackHandler()
 
 from agents.trip_planner import trip_planner_agent
 
@@ -81,7 +81,7 @@ if user_request:
                 stream_mode=["messages", "values"],
                 subgraphs=True,
                 version="v1",
-                config={"callbacks": [langfuse_handler]},
+                # config={"callbacks": [langfuse_handler]},
             ):
                 if mode == "messages":
                     if not namespace:
