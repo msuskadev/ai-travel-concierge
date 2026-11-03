@@ -2,6 +2,8 @@ import streamlit as st
 from dotenv import load_dotenv
 from langfuse.langchain import CallbackHandler
 
+st.set_page_config(page_title="Trip Planner", page_icon="✈️")
+
 load_dotenv()
 langfuse_handler = CallbackHandler()
 
@@ -32,13 +34,18 @@ def message_role(message):
         return "assistant"
     return None
 
-
-st.set_page_config(page_title="Trip Planner", page_icon="✈️")
 st.session_state.setdefault("conversation", [])
 
-title_col, reset_col = st.columns([5, 1])
+logo_col, title_col, reset_col = st.columns(
+    [2, 5, 1], vertical_alignment="center"
+)
+with logo_col:
+    st.image("assets/logo.jpg", width=150)
 with title_col:
-    st.title("Trip Planner ✈️")
+    st.markdown(
+        "<h1 style='text-align: center;'>AI Travel Concierge</h1>",
+        unsafe_allow_html=True,
+    )
 with reset_col:
     st.write("")
     reset_conversation = st.button("Nowe zapytanie", icon="➕", use_container_width=True)
