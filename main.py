@@ -11,6 +11,7 @@ args = parser.parse_args()
 prompt = args.prompt if args.prompt is not None else input("Podaj prompt:")
 
 agent = create_deep_agent(
+    # system_prompt="Jestes tlumaczem, znasz wszystkie języki świata.",
     name="hello-world-agent",
     model="gpt-6-luna",
     tools=[],
