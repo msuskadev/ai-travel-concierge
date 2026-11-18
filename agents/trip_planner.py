@@ -16,8 +16,10 @@ SYSTEM_PROMPT = """
     - czas przejścia lub przejazdu między atrakcjami.
 """
 
+
+
 trip_planner_agent = create_agent(
     name="trip_planner_agent",
-    model="google_genai:gemini-3.5-flash-lite",
+    model="openrouter:openai/gpt-6-luna",
     system_prompt=SYSTEM_PROMPT,
 )
