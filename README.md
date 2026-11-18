@@ -35,10 +35,21 @@ W katalogu projektu uruchom:
 uv sync
 ```
 
-Polecenie utworzy środowisko `.venv` i zainstaluje zależności zapisane w `uv.lock`. Aktywuj środowisko:
+Polecenie utworzy środowisko `.venv` i zainstaluje zależności zapisane w `uv.lock`. Aktywuj je poleceniem odpowiednim dla używanego terminala:
 
 ```bash
+# macOS / Linux
 source .venv/bin/activate
+```
+
+```powershell
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
+
+```bash
+# Bash w Windows (np. Git Bash)
+source .venv/Scripts/activate
 ```
 
 W terminalu powinien pojawić się prefiks `(.venv)`. Aktywacja jest opcjonalna, jeśli uruchamiasz aplikację przez `uv run`.
