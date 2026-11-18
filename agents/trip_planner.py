@@ -18,8 +18,9 @@ SYSTEM_PROMPT = """
 
 
 
+
 trip_planner_agent = create_agent(
     name="trip_planner_agent",
-    model="openrouter:openai/gpt-6-luna",
+    model="google_genai:gemini-3.5-flash-lite",
     system_prompt=SYSTEM_PROMPT,
 )
