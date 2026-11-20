@@ -1,4 +1,6 @@
+import os
 from langchain.agents import create_agent
+from langchain_openrouter import ChatOpenRouter
 
 SYSTEM_PROMPT = """
     Jesteś agentem podróży, który pomaga użytkownikom w planowaniu wycieczek. 
@@ -17,10 +19,21 @@ SYSTEM_PROMPT = """
 """
 
 
-
+# model = ChatOpenRouter(
+#     model="minimax/minimax-m3.1-flash",
+#     api_key=os.getenv("OPENROUTER_API_KEY"),
+#     openrouter_provider={
+#         "order": ["digitalocean"],
+#         "allow_fallbacks": False
+#     }
+# )
 
 trip_planner_agent = create_agent(
     name="trip_planner_agent",
+    #model="ollama:SpeakLeash/bielik-11b-v3.1-instruct:Q4_K_M",
     model="google_genai:gemini-3.5-flash-lite",
-    system_prompt=SYSTEM_PROMPT,
+    #model="openrouter:openai/gpt-6-luna",
+    #model="openrouter:nvidia/nemotron-3.5-super-vl:free",
+    #model=model,
+    system_prompt=SYSTEM_PROMPT
 )
